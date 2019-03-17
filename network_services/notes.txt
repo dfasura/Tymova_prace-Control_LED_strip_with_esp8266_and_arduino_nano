@@ -1,0 +1,1 @@
+Part of code witch create hotspot or connect to wifi 
