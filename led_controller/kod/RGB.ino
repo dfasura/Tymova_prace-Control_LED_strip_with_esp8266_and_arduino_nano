@@ -11,13 +11,11 @@ unsigned long colorWipePreviousMillis=0;
 unsigned long theaterChasePreviousMillis=0;
 unsigned long theaterChaseRainbowPreviousMillis=0;
 unsigned long rainbowPreviousMillis=0;
-unsigned long rainbowCyclesPreviousMillis=0;
 
 int theaterChaseQ = 0;
 int theaterChaseRainbowQ = 0;
 int theaterChaseRainbowCycles = 0;
 int rainbowCycles = 0;
-int rainbowCycleCycles = 0;
 
 uint16_t currentPixel = 0;
 
@@ -85,11 +83,6 @@ void loop () {
           rainbowPreviousMillis = millis();
           rainbow();
         }
-      
-        if ((unsigned long)(millis() - rainbowCyclesPreviousMillis) >= pixelsInterval) {
-            rainbowCyclesPreviousMillis = millis();
-            rainbowCycle();
-        }  
 
 }
 
@@ -111,21 +104,6 @@ void rainbow() {
   rainbowCycles++;
   if(rainbowCycles >= 256) rainbowCycles = 0;
 }
-
-
-void rainbowCycle() {
-  uint16_t i;
-
-
-    for(i=0; i< pixels.numPixels(); i++) {
-      pixels.setPixelColor(i, Wheel(((i * 256 / pixels.numPixels()) + rainbowCycleCycles) & 255));
-    }
-    pixels.show();
-
-  rainbowCycleCycles++;
-  if(rainbowCycleCycles >= 256*5) rainbowCycleCycles = 0;
-}
-
 
 void theaterChase(uint32_t c) {
   for (int i=0; i < pixels.numPixels(); i=i+3) {
