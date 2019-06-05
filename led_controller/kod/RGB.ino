@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
-#define PIXELSPIN   2
-#define NUMPIXELS   8
+#define PIXELSPIN   6
+#define NUMPIXELS   24
 #define CALIBRATIONTIME 20000
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIXELSPIN, NEO_GRB + NEO_KHZ800);
@@ -9,12 +9,12 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIXELSPIN, NEO_GRB + NEO
 unsigned long pixelsInterval=50;
 unsigned long colorWipePreviousMillis=0;
 unsigned long theaterChasePreviousMillis=0;
-unsigned long theaterChaseRainbowPreviousMillis=0;
 unsigned long rainbowPreviousMillis=0;
+unsigned long redFadeInAndOutMillis=0;
+unsigned long greenFadeInAndOutMillis=0;
+unsigned long blueFadeInAndOutMillis=0;
 
 int theaterChaseQ = 0;
-int theaterChaseRainbowQ = 0;
-int theaterChaseRainbowCycles = 0;
 int rainbowCycles = 0;
 
 uint16_t currentPixel = 0;
@@ -74,19 +74,23 @@ void loop () {
           theaterChase(pixels.Color(0, 0, 255)); //blue
         }
       
-        if ((unsigned long)(millis() - theaterChaseRainbowPreviousMillis) >= pixelsInterval) {
-          theaterChaseRainbowPreviousMillis = millis();
-          theaterChaseRainbow();
+      if ((unsigned long)(millis() - rainbowPreviousMillis) >= pixelsInterval) {
+        rainbowPreviousMillis = millis();
+        rainbow();
         }
-      
-        if ((unsigned long)(millis() - rainbowPreviousMillis) >= pixelsInterval) {
-          rainbowPreviousMillis = millis();
-          rainbow();
+      if ((unsigned long)(millis() - blueFadeInAndOutMillis) >= pixelsInterval) {
+          blueFadeInAndOutMillis = millis();
+          blueFadeInAndOut(); //blue
         }
-
+      if ((unsigned long)(millis() - redFadeInAndOutMillis) >= pixelsInterval) {
+          redFadeInAndOutMillis = millis();
+          redFadeInAndOut(); //red
+        }
+      if ((unsigned long)(millis() - greenFadeInAndOutMillis) >= pixelsInterval) {
+          greenFadeInAndOutMillis = millis();
+          greenFadeInAndOut(); //green
+        }
 }
-
-
 void colorWipe(uint32_t c){
   pixels.setPixelColor(currentPixel,c);
   pixels.show();
@@ -105,6 +109,54 @@ void rainbow() {
   if(rainbowCycles >= 256) rainbowCycles = 0;
 }
 
+void blueFadeInAndOut() {
+  for(uint8_t b = 0; b <255; b++) {
+     for(uint8_t i=0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 0 * b/255, 0 * b/255, 255 * b/255); //blue
+     }
+     pixels.show();
+  }
+
+  for(uint8_t b=255; b > 0; b--) {
+     for(uint8_t i = 0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 0 * b/255, 0 * b/255, 255 * b/255); //red
+     }
+     pixels.show();
+  }
+}
+
+void redFadeInAndOut() {
+  for(uint8_t b = 0; b <255; b++) {
+     for(uint8_t i=0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 255 * b/255, 0 * b/255, 0 * b/255); //red
+     }
+     pixels.show();
+  }
+
+  for(uint8_t b=255; b > 0; b--) {
+     for(uint8_t i = 0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 255 * b/255, 0 * b/255, 0 * b/255);
+     }
+     pixels.show();
+  }
+}
+
+void greenFadeInAndOut() {
+  for(uint8_t b = 0; b <255; b++) {
+     for(uint8_t i=0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 0 * b/255, 255 * b/255, 0 * b/255);
+     }
+     pixels.show();
+  }
+
+  for(uint8_t b=255; b > 0; b--) {
+     for(uint8_t i = 0; i < pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, 0 * b/255, 255 * b/255, 0 * b/255);
+     }
+     pixels.show();
+  }
+}
+
 void theaterChase(uint32_t c) {
   for (int i=0; i < pixels.numPixels(); i=i+3) {
       pixels.setPixelColor(i+theaterChaseQ, c);    
@@ -116,24 +168,6 @@ void theaterChase(uint32_t c) {
     theaterChaseQ++;
     if(theaterChaseQ >= 3) theaterChaseQ = 0;
 }
-
-
-
-void theaterChaseRainbow() {
-  for (int i=0; i < pixels.numPixels(); i=i+3) {
-    pixels.setPixelColor(i+theaterChaseRainbowQ, Wheel( (i+theaterChaseRainbowCycles) % 255));    
-  }
-      
-  pixels.show();
-  for (int i=0; i < pixels.numPixels(); i=i+3) {
-    pixels.setPixelColor(i+theaterChaseRainbowQ, 0);              
-  }      
-  theaterChaseRainbowQ++;
-  theaterChaseRainbowCycles++;
-  if(theaterChaseRainbowQ >= 3) theaterChaseRainbowQ = 0;
-  if(theaterChaseRainbowCycles >= 256) theaterChaseRainbowCycles = 0;
-}
-
 
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
